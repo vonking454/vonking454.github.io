@@ -199,6 +199,7 @@
         document.getElementById('movieDetails').innerHTML = detailsHtml;
       } catch (error) {
         console.error('Error fetching movie details:', error);
+        document.getElementById('movieDetails').innerHTML = '<p>Failed to load movie details.</p>';
       }
     }
 
@@ -208,6 +209,7 @@
       document.getElementById('searchQuery').style.display = 'block'; // Show search input
       document.querySelector('button').style.display = 'inline-block'; // Show search button
       document.getElementById('videoContainer').style.display = 'none'; // Hide video player
+      document.getElementById('movieDetails').innerHTML = ''; // Clear movie details
     }
   </script>
 </body>
