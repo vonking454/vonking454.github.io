@@ -176,6 +176,13 @@
       const videoContainer = document.getElementById('videoContainer');
       videoContainer.style.display = 'block';
 
+      // Ensure movie details container exists
+      const movieDetailsContainer = document.getElementById('movieDetails');
+      if (movieDetailsContainer) {
+        // Clear any previous details
+        movieDetailsContainer.innerHTML = '';
+      }
+
       // Embed the video using the movie ID
       const iframe = `
         <iframe src="https://vidsrc.cc/v2/embed/movie/${movieId}" frameborder="0" allowfullscreen></iframe>
@@ -196,10 +203,12 @@
           <p><strong>Release Date:</strong> ${releaseDate}</p>
           <p><a href="${moreInfoLink}" target="_blank">More Info</a></p>
         `;
-        document.getElementById('movieDetails').innerHTML = detailsHtml;
+        movieDetailsContainer.innerHTML = detailsHtml;
       } catch (error) {
         console.error('Error fetching movie details:', error);
-        document.getElementById('movieDetails').innerHTML = '<p>Failed to load movie details.</p>';
+        if (movieDetailsContainer) {
+          movieDetailsContainer.innerHTML = '<p>Failed to load movie details.</p>';
+        }
       }
     }
 
