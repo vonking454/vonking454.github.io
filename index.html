@@ -42,6 +42,7 @@
     .movie {
       margin: 10px;
       text-align: center;
+      cursor: pointer;
     }
     .movie img {
       width: 200px;
@@ -53,17 +54,46 @@
       margin-top: 10px;
       font-weight: bold;
     }
+    #backButton {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 10px 15px;
+      background-color: #333;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    #videoContainer {
+      margin-top: 20px;
+      text-align: center;
+    }
+    iframe {
+      width: 80%;
+      height: 500px;
+      border: none;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
+  <button id="backButton" onclick="goBack()" style="display: none;">Back</button>
   <h1>Movie and TV Search</h1>
-  <input type="text" id="searchQuery" placeholder="Search for a movie or TV show...">
+  <input type="text" id="searchQuery" placeholder="Search for a movie or TV show..." onkeyup="handleKeyUp(event)">
   <button onclick="searchMovies()">Search</button>
 
   <div class="results" id="results"></div>
+  <div id="videoContainer" style="display: none;"></div>
 
   <script>
     const apiKey = '653bb8af90162bd98fc7ee32bcbbfb3d';
+
+    // Trigger search when pressing enter
+    function handleKeyUp(event) {
+      if (event.key === "Enter") {
+        searchMovies();
+      }
+    }
 
     async function searchMovies() {
       const query = document.getElementById('searchQuery').value;
@@ -71,9 +101,9 @@
         alert('Please enter a search term');
         return;
       }
-      
+
       const url = `https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&query=${query}`;
-      
+
       try {
         const response = await fetch(url);
         const data = await response.json();
@@ -86,27 +116,50 @@
     function displayResults(results) {
       const resultsContainer = document.getElementById('results');
       resultsContainer.innerHTML = ''; // Clear previous results
-      
+
       if (results.length === 0) {
         resultsContainer.innerHTML = '<p>No results found.</p>';
         return;
       }
 
       results.forEach(result => {
-        const imgUrl = result.poster_path 
-          ? `https://image.tmdb.org/t/p/w200${result.poster_path}` 
+        const imgUrl = result.poster_path
+          ? `https://image.tmdb.org/t/p/w200${result.poster_path}`
           : 'https://via.placeholder.com/200x300?text=No+Image';
-        
         const title = result.title || result.name;
+        const movieId = result.id; // Movie or show ID
 
         const movieDiv = document.createElement('div');
         movieDiv.classList.add('movie');
         movieDiv.innerHTML = `
-          <img src="${imgUrl}" alt="${title}">
+          <img src="${imgUrl}" alt="${title}" onclick="playVideo(${movieId})">
           <p>${title}</p>
         `;
         resultsContainer.appendChild(movieDiv);
       });
+    }
+
+    function playVideo(movieId) {
+      document.getElementById('backButton').style.display = 'block'; // Show back button
+      document.getElementById('results').style.display = 'none'; // Hide results
+      document.getElementById('searchQuery').style.display = 'none'; // Hide search input
+      document.querySelector('button').style.display = 'none'; // Hide search button
+
+      const videoContainer = document.getElementById('videoContainer');
+      videoContainer.style.display = 'block';
+
+      // Embed the video using the movie ID
+      videoContainer.innerHTML = `
+        <iframe src="https://vidsrc.cc/v2/embed/movie/${movieId}" frameborder="0" allowfullscreen></iframe>
+      `;
+    }
+
+    function goBack() {
+      document.getElementById('backButton').style.display = 'none'; // Hide back button
+      document.getElementById('results').style.display = 'flex'; // Show results
+      document.getElementById('searchQuery').style.display = 'block'; // Show search input
+      document.querySelector('button').style.display = 'inline-block'; // Show search button
+      document.getElementById('videoContainer').style.display = 'none'; // Hide video player
     }
   </script>
 </body>
