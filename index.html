@@ -85,6 +85,21 @@
       border: none;
       margin-top: 20px;
     }
+    .movie-details {
+      margin-top: 20px;
+      color: #f4f4f4;
+      text-align: left;
+      padding: 0 20px;
+    }
+    .movie-details p {
+      font-size: 18px;
+      line-height: 1.6;
+    }
+    .movie-details a {
+      color: #1e90ff;
+      text-decoration: none;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -94,7 +109,9 @@
   <button onclick="searchMovies()">Search</button>
 
   <div class="results" id="results"></div>
-  <div id="videoContainer" style="display: none;"></div>
+  <div id="videoContainer" style="display: none;">
+    <div class="movie-details" id="movieDetails"></div>
+  </div>
 
   <script>
     const apiKey = '653bb8af90162bd98fc7ee32bcbbfb3d';
@@ -150,7 +167,7 @@
       });
     }
 
-    function playVideo(movieId) {
+    async function playVideo(movieId) {
       document.getElementById('backButton').style.display = 'block'; // Show back button
       document.getElementById('results').style.display = 'none'; // Hide results
       document.getElementById('searchQuery').style.display = 'none'; // Hide search input
@@ -160,9 +177,29 @@
       videoContainer.style.display = 'block';
 
       // Embed the video using the movie ID
-      videoContainer.innerHTML = `
+      const iframe = `
         <iframe src="https://vidsrc.cc/v2/embed/movie/${movieId}" frameborder="0" allowfullscreen></iframe>
       `;
+      videoContainer.innerHTML = iframe;
+
+      // Fetch movie details from TMDB
+      try {
+        const movieDetailsResponse = await fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${apiKey}`);
+        const movieDetails = await movieDetailsResponse.json();
+
+        const description = movieDetails.overview || 'No description available.';
+        const releaseDate = movieDetails.release_date || 'No release date available.';
+        const moreInfoLink = `https://www.themoviedb.org/movie/${movieId}`;
+
+        const detailsHtml = `
+          <p><strong>Description:</strong> ${description}</p>
+          <p><strong>Release Date:</strong> ${releaseDate}</p>
+          <p><a href="${moreInfoLink}" target="_blank">More Info</a></p>
+        `;
+        document.getElementById('movieDetails').innerHTML = detailsHtml;
+      } catch (error) {
+        console.error('Error fetching movie details:', error);
+      }
     }
 
     function goBack() {
